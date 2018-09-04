@@ -11,6 +11,8 @@ Files can be found in the `openapi/` directory:
 
 ## Examples for API v1
 
+Vello identifies entities by using uuids.
+
 ### Authentication using OAuth
 
 To authenticate communication between the servers we are using the Client Credentials Grant flow of OAuth.
@@ -89,7 +91,8 @@ Content-Type: application/json
             "office": "off_12345",
             "company": "com_12345",
             "payment_price": 4500,
-            "payment_currency": "EUR"
+            "payment_currency": "EUR",
+            "payment_required": false
           },
           {
             "id": "ser_23456",
@@ -99,7 +102,8 @@ Content-Type: application/json
             "office": "off_12345",
             "company": "com_12345",
             "payment_price": 3500,
-            "payment_currency": "EUR"
+            "payment_currency": "EUR",
+            "payment_required": false
           },
           {
             "id": "ser_34567",
@@ -109,7 +113,8 @@ Content-Type: application/json
             "office": "off_12345",
             "company": "com_12345",
             "payment_price": 8500,
-            "payment_currency": "EUR"
+            "payment_currency": "EUR",
+            "payment_required": false
           }
         ],
         "has_more": false,
@@ -229,7 +234,7 @@ Content-Type: application/json
   "service": "ser_12345",
   "allocation": "all_12345",
   "customer": "cus_123456",
-  "  ": null,
+  "user": null,
   "time": 123450000,
   "duration": 2700,
   "type": "single",
@@ -250,6 +255,100 @@ Content-Type: application/json
   "created": 123400000,
   "changed": 123400000,
   "version": 1
+}
+
+```
+
+To update or cancel existing record as anonymous user, you need to know `record id` and `record number` from original record. Note that you can patch only fields that are not protected, eg. language and details.
+
+```
+PUT /v1/record/rec_12345?record_number=rec_12345
+Headers
+  Content-Type: application/json
+  Authorization: Bearer <token>
+Body
+{
+  "language": "se"
+}
+
+```
+
+Result will be updated record. Protected fields like `changed` and `version'` are managed and updated by the system automatically.
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "id": "rec_12345",
+  "object": "record",
+  "company": "com_12345",
+  "office": "off_12345",
+  "resource": "res_12345",
+  "service": "ser_12345",
+  "allocation": "all_12345",
+  "customer": "cus_123456",
+  "user": null,
+  "time": 123450000,
+  "duration": 2700,
+  "type": "single",
+  "details": {
+    "name": "Matti Meikälainen"
+    "email": "matti.meikalainen@vello.fi",
+    "phone": "+35845123456"
+  },
+  "group": null,
+  "record_number": "rec_12345",
+  "payment_paid": false,
+  "language": "se",
+  "allocated_time_start": 123445000,
+  "allocated_time_end": 123452300,
+  "confirmation_status": "confirmed",
+  "created_by": null,
+  "tos": 123456789,
+  "created": 123400000,
+  "changed": 12345678,
+  "version": 2
+}
+
+```
+
+### Record payment
+
+Record payment status is one of the protected fields and can be updated only programmatically. If customer is able to pay booking forehand within your application, you need to provide payment information after record is created. This feature requires that your OAuth Customer credentials are permitted to access records payment data.
+
+Following example shows how to provide payment data for record. Payment value is incremential. In the future we plan to support also partial payment. This feature is required if user has vouchers or uses multiple payment methods to complete the full payment. Record payment status field is updated to `true` after full payment.
+
+```
+POST /v1/record/rec_12345/payment?record_number=rec_12345
+Headers
+  Content-Type: application/json
+  Authorization: Bearer <token>
+Body
+{
+  "method": "[custom_payment_method]",
+  "payment_value": 4500,
+  "payment_currency": EUR
+}
+
+```
+
+Result is:
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "status": true,
+  "current_value": {
+    "payment_paid": true,
+    "payment_value": 4500,
+    "payment_currency": "EUR"
+  },
+  "previous_value": {
+    "payment_paid": false,
+    "payment_value": 0,
+    "payment_currency": "EUR"
+  }
 }
 
 ```

@@ -316,7 +316,7 @@ Content-Type: application/json
 
 Record payment status is one of the protected fields and can be updated only programmatically. If customer is able to pay booking forehand within your application, you need to provide payment information after record is created. This feature requires that your OAuth Customer credentials are permitted to access records payment data.
 
-Following example shows how to provide payment data for record. Payment value is incremential. In the future we plan to support also partial payment. This feature is required if user has vouchers or uses multiple payment methods to complete the full payment. Record payment status field is updated to `true` after full payment.
+Following example shows how to provide payment data for your record. Payment value is incremential. In the future we plan to support also partial payments. This feature is required if user has vouchers or uses multiple payment methods to complete the full payment. Record `payment_paid` field is updated to `true` after a full payment.
 
 ```
 POST /v1/record/rec_12345/payment?record_number=rec_12345

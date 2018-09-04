@@ -273,7 +273,7 @@ Body
 
 ```
 
-Result will be updated record. Protected fields like `changed` and `version'` are managed and updated by the system automatically.
+Result will be updated record. Protected fields like `changed` and `version` are managed and updated by the system automatically.
 
 ```
 HTTP/1.1 200 OK

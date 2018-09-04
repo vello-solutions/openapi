@@ -18,7 +18,7 @@ To authenticate communication between the servers we are using the Client Creden
 ```
 POST /v1/oauth/token
 Headers
-	Content-Type: application/json
+  Content-Type: application/json
 Body
 {
   "grant_type": "client_credentials",
@@ -50,8 +50,8 @@ After authentication you can retrieve list of offices with resource & service in
 ```
 GET /v1/offices?country=FI&zipcode=90130&industry[]=barber
 Headers:
-	Content-Type: application/json
-	Authorization: Bearer <token>
+  Content-Type: application/json
+  Authorization: Bearer <token>
 
 ```
 
@@ -142,8 +142,8 @@ When service is selected, we can provide suggestions for next available times fo
 ```
 GET /v1/resources_availability?service=...&resource[]=...&from=123&to=123&limit=10
 Headers:
-	Content-Type: application/json
-	Authorization: Bearer <token>
+  Content-Type: application/json
+  Authorization: Bearer <token>
 
 ```
 
@@ -192,8 +192,8 @@ To book selected time you need to write record with required information:
 ```
 POST /v1/records
 Headers
-	Content-Type: application/json
-	Authorization: Bearer <token>
+  Content-Type: application/json
+  Authorization: Bearer <token>
 Body
 {
   "company": "com_12345",
@@ -221,7 +221,7 @@ If everything went well, we will return a newly created record object for you:
 HTTP/1.1 200 OK
 Content-Type: application/json
 {
-	"id": "rec_12345",
+  "id": "rec_12345",
   "object": "record",
   "company": "com_12345",
   "office": "off_12345",
@@ -229,7 +229,7 @@ Content-Type: application/json
   "service": "ser_12345",
   "allocation": "all_12345",
   "customer": "cus_123456",
-  "user": null,
+  "  ": null,
   "time": 123450000,
   "duration": 2700,
   "type": "single",
@@ -253,4 +253,3 @@ Content-Type: application/json
 }
 
 ```
-

@@ -365,7 +365,7 @@ create things like external analytics and automation for business tasks.
 
 Note: To enable this feature, you need to sign in to our Beta program.
 
-Webhooks are POST-requests to your endpoint. Following example shows `record.created`
+Webhooks are POST-requests to your endpoint. Following example shows `record.created` webhook data:
 
 ```
 POST to https://app.yourservice.com/webhooks/vello
@@ -415,6 +415,33 @@ try to resend the request for a while.
 
 `notification.sent`
 
+## Implementing and testing webhook connection
+
+To implement webhooks you should sign in to our Beta program. After this you can
+configure your application services webhook endpoint to your Vello account.
+
+We will also provide you the secure token keys to interact with Vello.
+
+To test webhook connection you can request Vello to send you a `connection.test`
+webhook event from UI. We will send you following event:
+
+```
+POST to https://app.yourservice.com/webhooks/vello
+
+Headers
+  Content-Type: application/json
+  Authorization: <token>
+Body
+{
+  "entity_id": "[UUID]",
+  "type": "connection.test",
+  "data": {}
+}
+
+Response
+
+HTTP/1.1 200 OK
+```
 
 ## Dynamic webhook events
 

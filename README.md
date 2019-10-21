@@ -352,3 +352,110 @@ Content-Type: application/json
 }
 
 ```
+
+# Vello Events and Webhooks
+
+Events makes it possible to let you know when something happens in your account.
+When an event occurs, we create an `Event` object. This happens for example
+when someone makes reservation eg. creates a `Record` object.
+
+Vello can notify your application service when something happens using webhooks by sending
+`Event` objects to an endpoint on your server. This way webhooks can be used to
+create things like external analytics and automation for business tasks.
+
+Note: To enable this feature, you need to sign in to our Beta program.
+
+Webhooks are POST-requests to your endpoint. Following example shows `record.created`
+
+```
+POST to https://app.yourservice.com/webhooks/vello
+
+Headers
+  Content-Type: application/json
+  Authorization: <token>
+Body
+{
+  "entity_id": "[UUID]",
+  "type": "record.created",
+  "data": {
+    "object": {
+      "entity_id": "[RECORD UUID]",
+      ...
+    }
+  }
+}
+
+Response
+
+HTTP/1.1 200 OK
+```
+
+You should always return a `200 OK` response to webhook callbacks. If request fails, Vello will
+try to resend the request for a while.
+
+## List of interesting `Event` object types:
+
+`connection.test`
+
+`record.created`
+
+`record.update_metadata`
+
+`record.updated`
+
+`record.cancelled`
+
+`record.deleted`
+
+`notification.created`
+
+`notification.updated`
+
+`notification.deleted`
+
+`notification.sent`
+
+
+## Dynamic webhook events
+
+Some webhook events are used to provide additional data for Vello. For example,
+if you want to update `Record` object on the fly to assign a Video conference link
+to your meeting, implement `record.update_metadata` webhook:
+
+In this case you should always return `200 OK` and `metadata` object to be assigned
+to `Record` object's `metadata` field.
+
+```
+POST to https://app.yourservice.com/webhooks/vello
+
+Headers
+  Content-Type: application/json
+  Authorization: <token>
+Body
+{
+  "entity_id": "[UUID]",
+  "type": "record.update_metadata",
+  "data": {
+    "object": {
+      "entity_id": "[RECORD UUID]",
+      ...
+    }
+  }
+}
+```
+
+Your response to this requst should contain the actual metadata:
+
+```
+Response
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "metadata": {
+    "video_link": "https://app.yourservice.com/meeting/12345"
+  }
+}
+```
+
+At the moment you can provide following metadata keys: `video_link` and `tag`.

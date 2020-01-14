@@ -92,8 +92,11 @@ Headers
 Body
 {
   "id": "[UUID]",
+  "object": "event",
   "type": "connection.test",
-  "data": {}
+  "data": {},
+  "created": 1578952635,
+  "changed": 1578952635
 }
 
 Response
@@ -119,6 +122,7 @@ Headers
 Body
 {
   "id": "[UUID]",
+  "object": "event",
   "type": "record.update_metadata",
   "data": {
     "id": "639e9909-db32-4b5b-8159-42e1cabd7f24",
@@ -151,7 +155,9 @@ Body
     "created": 1578952635,
     "changed": 1578952635,
     "version": 1
-  }
+  },
+  "created": 1578952635,
+  "changed": 1578952635
 }
 ```
 

@@ -43,7 +43,7 @@ try to resend the request for a while.
 ## Webhook signatures
 
 All webhook events that are sent yo your endpoints are signed by Vello using
-your endpoint"s secret token. Signature is included in each event"s
+your endpoint"s secret token. Signature is included in each event's
 Vello-Signature header.
 
 You can verify the request body using signature and by checking SHA-512 hash.

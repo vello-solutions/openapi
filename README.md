@@ -1,385 +1,32 @@
-# Vello's OpenAPI Specification
-
-This repository contains [OpenAPI specifications][openapi] for Vello's API.
-
-Files can be found in the `openapi/` directory:
-
-* `spec3.{json,yaml}:` OpenAPI 3.0 spec.
-
-[openapi]: https://www.openapis.org/
-
-
-## Examples for API v1
-
-Vello identifies entities by using uuids.
-
-### Authentication using OAuth
-
-To authenticate communication between the servers we are using the Client Credentials Grant flow of OAuth.
-
-```
-POST /v1/oauth/token
-Headers
-  Content-Type: application/json
-Body
-{
-  "grant_type": "client_credentials",
-  "client_id": "CLIENT_ID",
-  "client_secret": "LIENT_SECRET",
-  "audience": "https://api.vello.fi/v1/"
-}
-
-```
-
-The result will be an Access Token that can be used to make requests to the Vello API.
-
-```
-HTTP/1.1 200 OK
-Content-Type: application/json
-{
-  "access_token": "eyJz93a...k4laUWw",
-  "token_type":"Bearer",
-  "expires_in":86400
-}
-
-```
-
-### Retrieving list of offices near user
-
-
-After authentication you can retrieve list of offices with resource & service information. Provide additional filters to limit the search result.
-
-```
-GET /v1/offices?country=FI&zipcode=90130&industry[]=barber
-Headers:
-  Content-Type: application/json
-  Authorization: Bearer <token>
-
-```
-
-Returns list of matching offices for filters.
-
-```
-HTTP/1.1 200 OK
-Content-Type: application/json
-{
-  "object": "list",
-  "url": "/v1/offices",
-  "next_batch": "...",
-  "has_more": true,
-  "data": [
-    {
-      "id": "off_12345",
-      "object": "office",
-      "title": "Kampaamo Salon Maija",
-      "company": {
-        "id": "com_12345",
-        "object": "company",
-        "name": "Kampaamo Salon Maija",
-        "industry": "barber",
-        "timezone": "Europe/Helsinki",
-        "language": "fi"
-      },
-      "services": {
-        "object": "list",
-        "data": [
-          {
-            "id": "ser_12345",
-            "object": "service",
-            "title": "Hiustenleikkuu, naiset",
-            "duration": 2700,
-            "office": "off_12345",
-            "company": "com_12345",
-            "payment_price": 4500,
-            "payment_currency": "EUR",
-            "payment_required": false
-          },
-          {
-            "id": "ser_23456",
-            "object": "service",
-            "title": "Hiustenleikkuu, miehet",
-            "duration": 1800,
-            "office": "off_12345",
-            "company": "com_12345",
-            "payment_price": 3500,
-            "payment_currency": "EUR",
-            "payment_required": false
-          },
-          {
-            "id": "ser_34567",
-            "object": "service",
-            "title": "Värjäys",
-            "duration": 3600,
-            "office": "off_12345",
-            "company": "com_12345",
-            "payment_price": 8500,
-            "payment_currency": "EUR",
-            "payment_required": false
-          }
-        ],
-        "has_more": false,
-        "url": "/v1/office/off_12345/services"
-      },
-      "resources": {
-        "object": "list",
-        "data": [
-          {
-            "id": "...",
-            "object": "resource",
-            "title": "Maija Kampaaja",
-            "office": "off_12345",
-            "company": "com_12345"
-          }
-        ],
-        "has_more": false,
-        "url": "/v1/office/off_12345/resources"
-      }
-    }
-  ]
-}
-
-```
-
-### Resource availability
-
-When service is selected, we can provide suggestions for next available times for resources.
-
-```
-GET /v1/resources_availability?service=...&resource[]=...&from=123&to=123&limit=10
-Headers:
-  Content-Type: application/json
-  Authorization: Bearer <token>
-
-```
-
-The result is list of suggested times
-
-```
-HTTP/1.1 200 OK
-Content-Type: application/json
-{
-  "object": "list",
-  "url": "/v1/office/off_12345/resources_availability",
-  "data": [
-    {
-      "id": "res_12345",
-      "object": "resource",
-      "available_times": [
-        {
-          "id": "all_12345",
-          "service": "ser_12345",
-          "start": 123450000,
-          "duration": 2700,
-          "type": "single"
-        },
-        {
-          "id": "all_12345",
-          "service": "ser_12345",
-          "start": 123460000,
-          "duration": 2700,
-          "type": "single"
-        },
-      ],
-      "company": "com_12345",
-      "office": "off_12345",
-    }
-  ],
-  "next_batch": "...",
-  "has_more": true
-}
-
-```
-
-### Booking a time for customer
-
-To book selected time you need to write record with required information:
-
-```
-POST /v1/records
-Headers
-  Content-Type: application/json
-  Authorization: Bearer <token>
-Body
-{
-  "company": "com_12345",
-  "office": "off_12345",
-  "resource": "res_12345",
-  "service": "ser_12345",
-  "allocation": "all_12345",
-  "time": 123450000,
-  "duration": 2700,
-  "type": "single",
-  "details": {
-    "name": "Matti Meikälainen"
-    "email": "matti.meikalainen@vello.fi",
-    "phone": "+35845123456"
-  },
-  "tos": 123456789
-}
-
-```
-
-If everything went well, we will return a newly created record object for you:
-
-
-```
-HTTP/1.1 200 OK
-Content-Type: application/json
-{
-  "id": "rec_12345",
-  "object": "record",
-  "company": "com_12345",
-  "office": "off_12345",
-  "resource": "res_12345",
-  "service": "ser_12345",
-  "allocation": "all_12345",
-  "customer": "cus_123456",
-  "user": null,
-  "time": 123450000,
-  "duration": 2700,
-  "type": "single",
-  "details": {
-    "name": "Matti Meikälainen"
-    "email": "matti.meikalainen@vello.fi",
-    "phone": "+35845123456"
-  },
-  "group": null,
-  "record_number": "rec_12345",
-  "payment_paid": false,
-  "language": "fi",
-  "allocated_time_start": 123445000,
-  "allocated_time_end": 123452300,
-  "confirmation_status": "confirmed",
-  "created_by": null,
-  "tos": 123456789,
-  "created": 123400000,
-  "changed": 123400000,
-  "version": 1
-}
-
-```
-
-To update or cancel existing record as anonymous user, you need to know `record id` and `record number` from original record. Note that you can patch only fields that are not protected, eg. language and details.
-
-```
-PUT /v1/record/rec_12345?record_number=rec_12345
-Headers
-  Content-Type: application/json
-  Authorization: Bearer <token>
-Body
-{
-  "language": "se"
-}
-
-```
-
-Result will be updated record. Protected fields like `changed` and `version` are managed and updated by the system automatically.
-
-```
-HTTP/1.1 200 OK
-Content-Type: application/json
-{
-  "id": "rec_12345",
-  "object": "record",
-  "company": "com_12345",
-  "office": "off_12345",
-  "resource": "res_12345",
-  "service": "ser_12345",
-  "allocation": "all_12345",
-  "customer": "cus_123456",
-  "user": null,
-  "time": 123450000,
-  "duration": 2700,
-  "type": "single",
-  "details": {
-    "name": "Matti Meikälainen"
-    "email": "matti.meikalainen@vello.fi",
-    "phone": "+35845123456"
-  },
-  "group": null,
-  "record_number": "rec_12345",
-  "payment_paid": false,
-  "language": "se",
-  "allocated_time_start": 123445000,
-  "allocated_time_end": 123452300,
-  "confirmation_status": "confirmed",
-  "created_by": null,
-  "tos": 123456789,
-  "created": 123400000,
-  "changed": 12345678,
-  "version": 2
-}
-
-```
-
-### Record payment
-
-Record payment status is one of the protected fields and can be updated only programmatically. If customer is able to pay booking forehand within your application, you need to provide payment information after record is created. This feature requires that your OAuth Customer credentials are permitted to access records payment data.
-
-Following example shows how to provide payment data for your record. Payment value is incremential. In the future we plan to support also partial payments. This feature is required if user has vouchers or uses multiple payment methods to complete the full payment. Record `payment_paid` field is updated to `true` after a full payment.
-
-```
-POST /v1/record/rec_12345/payment?record_number=rec_12345
-Headers
-  Content-Type: application/json
-  Authorization: Bearer <token>
-Body
-{
-  "method": "[custom_payment_method]",
-  "payment_value": 4500,
-  "payment_currency": EUR
-}
-
-```
-
-Result is:
-
-```
-HTTP/1.1 200 OK
-Content-Type: application/json
-{
-  "status": true,
-  "current_value": {
-    "payment_paid": true,
-    "payment_value": 4500,
-    "payment_currency": "EUR"
-  },
-  "previous_value": {
-    "payment_paid": false,
-    "payment_value": 0,
-    "payment_currency": "EUR"
-  }
-}
-
-```
-
 # Vello Events and Webhooks
 
 Events makes it possible to let you know when something happens in your account.
 When an event occurs, we create an `Event` object. This happens for example
 when someone makes reservation eg. creates a `Record` object.
 
-Vello can notify your application service when something happens using webhooks by sending
-`Event` objects to an endpoint on your server. This way webhooks can be used to
-create things like external analytics and automation for business tasks.
+Vello can notify your application service when something happens using webhooks
+by sending `Event` objects to an endpoint on your server. This way webhooks can
+be used to create things like external analytics and automation for business
+tasks.
 
 Note: To enable this feature, you need to sign in to our Beta program.
 
-Webhooks are POST-requests to your endpoint. Following example shows `record.created` webhook data:
+Webhooks are POST-requests to your endpoint.
+Following example shows `record.created` webhook data:
 
 ```
 POST to https://app.yourservice.com/webhooks/vello
 
 Headers
   Content-Type: application/json
-  Authorization: <token>
+  Vello-Signature: <signature>
 Body
 {
-  "entity_id": "[UUID]",
+  "id": "[UUID]",
   "type": "record.created",
   "data": {
     "object": {
-      "entity_id": "[RECORD UUID]",
+      "id": "[RECORD UUID]",
       ...
     }
   }
@@ -393,27 +40,37 @@ HTTP/1.1 200 OK
 You should always return a `200 OK` response to webhook callbacks. If request fails, Vello will
 try to resend the request for a while.
 
+## Webhook signatures
+
+All webhook events that are sent yo your endpoints are signed by Vello using
+your endpoint"s secret token. Signature is included in each event"s
+Vello-Signature header.
+
+You can verify the request body using signature and by checking SHA-512 hash.
+
+Following example is for NodeJS. Result should be compared to Vello-Signature header.
+
+```
+const input = webhookToken + endpointUrl + body
+const hash = crypto.createHash("sha512").update(input).digest("hex");
+```
+
 ## List of interesting `Event` object types:
 
-`connection.test`
+We can send inform you about all kind of changes in event system, but these are
+the most used ones:
 
-`record.created`
+`connection.test` - Connection test event.
 
-`record.update_metadata`
+`record.created` - Record is just created.
 
-`record.updated`
+`record.updated` - Record is updated.
 
-`record.cancelled`
+`record.cancelled` - Record is cancelled.
 
-`record.deleted`
+`record.deleted` - Record is deleted.
 
-`notification.created`
-
-`notification.updated`
-
-`notification.deleted`
-
-`notification.sent`
+`record.update_metadata` - Dynamic webhook to provide metadata. See example below.
 
 ## Implementing and testing webhook connection
 
@@ -430,10 +87,11 @@ POST to https://app.yourservice.com/webhooks/vello
 
 Headers
   Content-Type: application/json
-  Authorization: <token>
+  Vello-Signature: <signature>
+
 Body
 {
-  "entity_id": "[UUID]",
+  "id": "[UUID]",
   "type": "connection.test",
   "data": {}
 }
@@ -450,23 +108,49 @@ if you want to update `Record` object on the fly to assign a Video conference li
 to your meeting, implement `record.update_metadata` webhook:
 
 In this case you should always return `200 OK` and `metadata` object to be assigned
-to `Record` object's `metadata` field.
+to `Record` object"s `metadata` field.
 
 ```
 POST to https://app.yourservice.com/webhooks/vello
 
 Headers
   Content-Type: application/json
-  Authorization: <token>
+  Vello-Signature: <signature>
 Body
 {
-  "entity_id": "[UUID]",
+  "id": "[UUID]",
   "type": "record.update_metadata",
   "data": {
-    "object": {
-      "entity_id": "[RECORD UUID]",
-      ...
-    }
+    "id": "639e9909-db32-4b5b-8159-42e1cabd7f24",
+    "object": "record",
+    "company": "90d491a1-50f9-42da-8c3a-9b0683f4a10d",
+    "office": "1aeef479-7c49-40e2-9ab6-09fd454fa226",
+    "resource": "f58c2d1e-b77f-439f-b7e5-d43c3265c65a",
+    "service": "74df9d2b-4ba3-45ef-a2be-30f87cf52e81",
+    "allocation": "685f7d57-cb01-4ca7-8f4e-882bf2d7ad84",
+    "user": "fbb70166-608d-49b9-b207-ab5c4197df4b",
+    "customer": "686ff2eb-36dd-450d-a03b-de859af80240",
+    "record_number": "b264c6ff-a8fc-4",
+    "quantity": 1,
+    "group": null,
+    "properties": null,
+    "language": "fi",
+    "time": 1578952635,
+    "duration": 1800,
+    "allocated_time_start": 1578952635,
+    "allocated_time_end": 1578954435,
+    "payment_paid": false,
+    "confirmation_status": "confirmed",
+    "details": {},
+    "metadata": {},
+    "ip": "",
+    "created_by": null,
+    "tos": 1578952635,
+    "canceled": false,
+    "archived": false,
+    "created": 1578952635,
+    "changed": 1578952635,
+    "version": 1
   }
 }
 ```

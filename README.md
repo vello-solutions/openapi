@@ -23,13 +23,15 @@ Headers
 Body
 {
   "id": "[UUID]",
+  "object": "event",
   "type": "record.created",
   "data": {
-    "object": {
-      "id": "[RECORD UUID]",
-      ...
-    }
-  }
+    "id": "639e9909-db32-4b5b-8159-42e1cabd7f24",
+    "object": "record",
+    ...
+  },
+  "created": 1578952635,
+  "changed": 1578952635
 }
 
 Response
